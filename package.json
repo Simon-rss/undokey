@@ -1,0 +1,40 @@
+{
+  "name": "undokey",
+  "version": "0.1.0",
+  "description": "A universal undo key for AI coding agents (Codex, Claude Code, OpenCode, Antigravity): every agent step becomes a restorable checkpoint, and for Codex you can rewind the conversation too.",
+  "type": "module",
+  "bin": {
+    "undokey": "bin/undokey.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "lint": "node --check bin/undokey.js && for f in src/*.js; do node --check $f || exit 1; done"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "undo",
+    "checkpoint",
+    "rewind",
+    "codex",
+    "claude-code",
+    "opencode",
+    "antigravity",
+    "hooks"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Simon-rss/undokey.git"
+  }
+}
