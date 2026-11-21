@@ -1,5 +1,9 @@
 # undokey
 
+[![CI](https://github.com/Simon-rss/undokey/actions/workflows/ci.yml/badge.svg)](https://github.com/Simon-rss/undokey/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg)](./pyproject.toml)
+
 **A universal undo key for AI coding agents.**
 
 Every tool call your agent makes becomes a restorable filesystem checkpoint — across **Codex CLI**, **OpenCode**, **Claude Code**, and **Antigravity** — without ever touching your project's `.git`.
@@ -8,26 +12,7 @@ For **Codex**, `undokey rewind <turn> --chat` rewinds **both your files and the 
 
 [中文文档](./README.zh-CN.md)
 
----
-
-```text
-$ undokey log
-── 2026-11-21
-● 9a098637  16:56:47  codex · Bash                                      1 file +0 -1
-  36482239  16:56:47  outside change (before codex turn)                1 file +1 -0
-  52e5ce27  16:56:47  codex · apply_patch                               2 files +2 -0
-  d306f314  16:56:47  baseline (first checkpoint)                       1 file +1 -0
-
-$ undokey turns
-#1   codex       16:56:47  1 tools   refactor auth middleware
-#2   codex       16:58:12  3 tools   rewrite database layer
-
-$ undokey rewind 2 --chat
-✓ files now match 52e5ce27 (before turn #2)
-  changed your mind? undokey to 9a098637
-✓ conversation forked to before turn #2 (original session untouched)
-  continue with: codex resume 01a1fd49-cc5b-78d7-a474-d3860f5acdd3
-```
+![undokey demo](./docs/demo.gif)
 
 ---
 
@@ -76,6 +61,7 @@ undokey init
 #    (For Codex, run /hooks inside codex once to approve the undokey entries.)
 
 # 3. Inspect or rewind anytime
+undokey ui                  # interactive TUI: ↑/↓ browse, live diff preview, Enter to restore
 undokey log                 # checkpoint timeline
 undokey diff <id>           # what that step changed (--now compares to current files)
 undokey undo                # step back 1 checkpoint (or: undokey undo 3)
@@ -110,6 +96,7 @@ This writes project-local hook configs and automatically adds them to `.git/info
 | `undokey init [--agent list] [--project]` | Install hooks for detected (or specified) agents |
 | `undokey uninstall [--agent list] [--project]` | Remove undokey hooks (keeps recorded checkpoints) |
 | `undokey status` | Show installed hooks and checkpoints recorded for this project |
+| `undokey ui [-n 200]` | Interactive split-pane TUI: browse checkpoints, live diff preview, press Enter to restore |
 | `undokey log [-n 30]` | Show checkpoint timeline for the current project |
 | `undokey diff <id> [--now] [--stat]` | Show diff of a checkpoint vs. its parent (or vs. current files with `--now`) |
 | `undokey undo [n]` | Restore files to `n` checkpoints earlier (always redoable) |
@@ -117,6 +104,7 @@ This writes project-local hook configs and automatically adds them to `.git/info
 | `undokey turns` | List agent turns (prompt, tool count, status) |
 | `undokey rewind <turn> [--after] [--chat]` | Restore files to before (or `--after`) a turn; `--chat` forks Codex conversation |
 | `undokey snapshot [dir] [--label text]` | Create a manual checkpoint |
+| `undokey gc [--all] [--prune-missing]` | Compact shadow git repos and reclaim disk space |
 | `undokey track [dir]` / `untrack [dir]` | Opt a non-git directory into recording |
 
 ## How It Handles Real-World Edge Cases

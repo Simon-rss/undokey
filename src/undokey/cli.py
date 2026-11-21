@@ -11,7 +11,8 @@ from undokey import __version__
 from undokey.git import git, real_repo_root
 from undokey.hook import handle_hook
 from undokey.install import AGENTS, detect_agents, install, is_installed, uninstall
-from undokey.store import TIMELINE_REF, Store, undokey_home
+from undokey.store import TIMELINE_REF, Store, list_stores, undokey_home
+from undokey.tui import run_tui
 from undokey.turns import fork_codex_session, turns_from_events
 from undokey.workspace import read_config, resolve_worktree, write_config
 
@@ -66,6 +67,7 @@ def _help_text() -> str:
   undokey status              what is installed, and what is recorded for this project
 
 {_bold("Everyday")}
+  undokey ui [-n 200]         interactive timeline + live diff preview (Enter to restore)
   undokey log [-n 30]         timeline of checkpoints for the current project
   undokey diff <id> [--now] [--stat]
                               what a step changed (or: checkpoint vs. current files)
@@ -80,6 +82,7 @@ def _help_text() -> str:
 
 {_bold("Other")}
   undokey snapshot [dir] [--label text]   manual checkpoint
+  undokey gc [--all] [--prune-missing]    compact shadow repos and reclaim disk space
   undokey track [dir] / untrack [dir]     record a directory that is not a git repo
   undokey hook <agent>                    (internal) called by agent hooks
 
@@ -405,6 +408,57 @@ def _cmd_snapshot(args: Dict[str, Any]) -> None:
             print(_dim(f"unchanged ({r['commit'][:8]})"))
 
 
+def _fmt_bytes(n: int) -> str:
+    val = float(n)
+    for unit in ("B", "KB", "MB", "GB"):
+        if val < 1024 or unit == "GB":
+            return f"{val:.1f} {unit}" if unit != "B" else f"{int(val)} B"
+        val /= 1024
+    return f"{n} B"
+
+
+def _cmd_ui(args: Dict[str, Any]) -> None:
+    store = _store_here()
+    _require_history(store)
+    n = int(args.get("n") or 200)
+    run_tui(store, limit=n)
+
+
+def _cmd_gc(args: Dict[str, Any]) -> None:
+    import shutil
+
+    if args.get("all") or args.get("prune-missing"):
+        stores = list_stores()
+        if not stores:
+            print(_dim("No shadow repositories found."))
+            return
+        total_before = 0
+        total_after = 0
+        removed = 0
+        for item in stores:
+            wt = item["worktree"]
+            if not os.path.exists(wt):
+                if args.get("prune-missing"):
+                    shutil.rmtree(item["dir"], ignore_errors=True)
+                    removed += 1
+                    print(f"{_yellow('✓')} pruned missing worktree  {_dim(wt)}")
+                else:
+                    print(f"{_dim('skipped missing worktree (pass --prune-missing to remove):')} {wt}")
+                continue
+            s = Store(wt)
+            r = s.gc()
+            total_before += r["before"]
+            total_after += r["after"]
+            print(f"{_green('✓')} {_fmt_bytes(r['before'])} -> {_fmt_bytes(r['after'])}  {_dim(wt)}")
+        print(_dim(f"\nTotal: {_fmt_bytes(total_before)} -> {_fmt_bytes(total_after)}" + (f", pruned {removed}" if removed else "")))
+        return
+
+    store = _store_here()
+    _require_history(store)
+    r = store.gc()
+    print(f"{_green('✓')} compacted shadow store: {_fmt_bytes(r['before'])} -> {_fmt_bytes(r['after'])}")
+
+
 def _cmd_track(args: Dict[str, Any], on: bool) -> None:
     d = os.path.realpath(os.path.abspath(args["_"][1]) if len(args["_"]) > 1 else os.getcwd())
     cfg = read_config()
@@ -436,6 +490,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             _cmd_uninstall(args)
         elif cmd in ("status", "doctor"):
             _cmd_status()
+        elif cmd in ("ui", "browse"):
+            _cmd_ui(args)
         elif cmd == "log":
             _cmd_log(args)
         elif cmd in ("diff", "show"):
@@ -450,6 +506,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             _cmd_rewind(args)
         elif cmd == "snapshot":
             _cmd_snapshot(args)
+        elif cmd == "gc":
+            _cmd_gc(args)
         elif cmd == "track":
             _cmd_track(args, True)
         elif cmd == "untrack":

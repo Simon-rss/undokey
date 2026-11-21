@@ -305,6 +305,30 @@ class Store:
                     pass
         return events
 
+    def disk_bytes(self) -> int:
+        """Total bytes used on disk by this shadow repository."""
+        if not os.path.exists(self.dir):
+            return 0
+        total = 0
+        for base, _, files in os.walk(self.dir):
+            for name in files:
+                try:
+                    total += os.path.getsize(os.path.join(base, name))
+                except OSError:
+                    pass
+        return total
+
+    def gc(self) -> Dict[str, int]:
+        """Pack loose objects to reclaim disk space."""
+        def _do() -> Dict[str, int]:
+            before = self.disk_bytes()
+            if self.exists():
+                self.g(["gc", "-q", "--prune=now"])
+            after = self.disk_bytes()
+            return {"before": before, "after": after}
+
+        return self.with_lock(_do)
+
 
 def list_stores(home: Optional[str] = None) -> List[Dict[str, str]]:
     h = home or undokey_home()

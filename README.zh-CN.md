@@ -1,5 +1,9 @@
 # undokey
 
+[![CI](https://github.com/Simon-rss/undokey/actions/workflows/ci.yml/badge.svg)](https://github.com/Simon-rss/undokey/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB.svg)](./pyproject.toml)
+
 **AI 编程 Agent 的通用撤销键。**
 
 把 Agent 的每一步工具调用都存成可随时回退的文件快照——支持 **Codex CLI**、**OpenCode**、**Claude Code**、**Antigravity**，**完全不碰你项目自己的 `.git`**。
@@ -8,26 +12,7 @@
 
 [English README](./README.md)
 
----
-
-```text
-$ undokey log
-── 2026-11-21
-● 9a098637  16:56:47  codex · Bash                                      1 file +0 -1
-  36482239  16:56:47  outside change (before codex turn)                1 file +1 -0
-  52e5ce27  16:56:47  codex · apply_patch                               2 files +2 -0
-  d306f314  16:56:47  baseline (first checkpoint)                       1 file +1 -0
-
-$ undokey turns
-#1   codex       16:56:47  1 tools   重构鉴权中间件
-#2   codex       16:58:12  3 tools   重写数据库层
-
-$ undokey rewind 2 --chat
-✓ files now match 52e5ce27 (before turn #2)
-  changed your mind? undokey to 9a098637
-✓ conversation forked to before turn #2 (original session untouched)
-  continue with: codex resume 01a1fd49-cc5b-78d7-a474-d3860f5acdd3
-```
+![undokey 演示](./docs/demo.gif)
 
 ---
 
@@ -76,6 +61,7 @@ undokey init
 #    （Codex 首次需要进入 codex 运行 /hooks 信任 undokey 条目）
 
 # 3. 随时查看和回退
+undokey ui                  # 交互式分屏 TUI：上下键浏览、实时看 diff、回车一键回退
 undokey log                 # 查看快照时间线
 undokey diff <id>           # 看某一步改了什么（加 --now 对比当前文件）
 undokey undo                # 退回上一步（或 undokey undo 3）
@@ -110,6 +96,7 @@ undokey init --project
 | `undokey init [--agent 列表] [--project]` | 安装 Hook（默认自动检测本机 Agent，全局生效） |
 | `undokey uninstall [--agent 列表] [--project]` | 卸载 Hook（保留已记录的快照） |
 | `undokey status` | 查看安装状态与当前项目快照数 |
+| `undokey ui [-n 200]` | 交互式分屏 TUI：上下键浏览、实时 diff 预览、回车回退 |
 | `undokey log [-n 30]` | 查看快照时间线 |
 | `undokey diff <id> [--now] [--stat]` | 查看某一步改动（`--now` 为对比当前文件） |
 | `undokey undo [n]` | 撤销最近 `n` 步（可随时恢复） |
@@ -117,6 +104,7 @@ undokey init --project
 | `undokey turns` | 查看对话轮次列表 |
 | `undokey rewind <轮次> [--after] [--chat]` | 回退到某轮之前（或 `--after` 之后）；`--chat` 同步分叉 Codex 对话 |
 | `undokey snapshot [目录] [--label 说明]` | 手动打一个快照 |
+| `undokey gc [--all] [--prune-missing]` | 压缩影子仓库、清理已删除项目的快照以回收空间 |
 | `undokey track [目录]` / `untrack [目录]` | 记录非 git 目录 |
 
 ## 实测解决的关键边界问题
