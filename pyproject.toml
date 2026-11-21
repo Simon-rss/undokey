@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "undokey"
+version = "0.1.0"
+description = "A universal undo key for AI coding agents (Codex, OpenCode, Claude Code, Antigravity): every agent step becomes a restorable checkpoint, and for Codex you can rewind the conversation too."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = []
+keywords = [
+  "ai",
+  "agent",
+  "undo",
+  "checkpoint",
+  "rewind",
+  "codex",
+  "claude-code",
+  "opencode",
+  "antigravity",
+  "hooks",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Version Control :: Git",
+]
+
+[project.urls]
+Homepage = "https://github.com/Simon-rss/undokey"
+Repository = "https://github.com/Simon-rss/undokey"
+Issues = "https://github.com/Simon-rss/undokey/issues"
+
+[project.scripts]
+undokey = "undokey.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

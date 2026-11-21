@@ -41,19 +41,29 @@ $ undokey rewind 2 --chat
 
 - 项目的 `.git`、暂存区、提交历史和 stash **完全不受影响**。
 - 每次回退前都会自动存一份当前快照——**撤销本身也能撤销**。
-- 零第三方依赖（仅需 Node.js ≥ 18 和 `git`）。
+- 纯 Python 标准库实现，**零第三方依赖**（仅需 Python ≥ 3.9 和 `git`）。
 
 ## 安装
 
+使用 [uv](https://docs.astral.sh/uv/)（推荐）：
+
 ```bash
-npm install -g github:Simon-rss/undokey
+uv tool install git+https://github.com/Simon-rss/undokey.git
+```
+
+使用 `pipx` 或 `pip`：
+
+```bash
+pipx install git+https://github.com/Simon-rss/undokey.git
+# 或
+pip install git+https://github.com/Simon-rss/undokey.git
 ```
 
 或者本地克隆安装：
 
 ```bash
 git clone https://github.com/Simon-rss/undokey.git
-cd undokey && npm link
+cd undokey && pip install -e .
 ```
 
 ## 快速开始
@@ -121,8 +131,8 @@ undokey init --project
 ## 开发与测试
 
 ```bash
-npm run lint
-npm test
+python3 -m compileall -q src tests
+python3 -m unittest discover -s tests -v
 ```
 
 ## 协议

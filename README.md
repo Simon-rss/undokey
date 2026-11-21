@@ -41,19 +41,29 @@ $ undokey rewind 2 --chat
 
 - Your project's `.git`, staging index, commits, and stashes are **never touched**.
 - Every restore takes a snapshot first — **even an undo can be undone**.
-- Zero runtime dependencies (Node.js ≥ 18 + `git`).
+- Pure Python standard library, **zero runtime dependencies** (Python ≥ 3.9 + `git`).
 
 ## Install
 
+With [uv](https://docs.astral.sh/uv/) (recommended):
+
 ```bash
-npm install -g github:Simon-rss/undokey
+uv tool install git+https://github.com/Simon-rss/undokey.git
+```
+
+With `pipx` or `pip`:
+
+```bash
+pipx install git+https://github.com/Simon-rss/undokey.git
+# or
+pip install git+https://github.com/Simon-rss/undokey.git
 ```
 
 Or from a local clone:
 
 ```bash
 git clone https://github.com/Simon-rss/undokey.git
-cd undokey && npm link
+cd undokey && pip install -e .
 ```
 
 ## Quick Start
@@ -121,8 +131,8 @@ This writes project-local hook configs and automatically adds them to `.git/info
 ## Development
 
 ```bash
-npm run lint
-npm test
+python3 -m compileall -q src tests
+python3 -m unittest discover -s tests -v
 ```
 
 ## License
